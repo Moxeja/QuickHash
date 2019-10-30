@@ -1,9 +1,8 @@
-#include <string>
+#include "Crypto/crypto_manager.h"
+
 #include <vector>
 #include <iostream>
 #include <fstream>
-
-#include "Crypto/crypto_manager.h"
 
 constexpr const char* VERSION = "0.1";
 

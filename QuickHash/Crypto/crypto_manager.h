@@ -3,7 +3,7 @@
 
 namespace crypto
 {
-	std::string calculate_md5(std::string* filepath);
-	std::string calculate_sha1(std::string* filepath);
-	std::string calculate_sha256(std::string* filepath);
+	std::string calculate_md5(const std::string* filepath);
+	std::string calculate_sha1(const std::string* filepath);
+	std::string calculate_sha256(const std::string* filepath);
 }
