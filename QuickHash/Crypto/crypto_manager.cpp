@@ -4,6 +4,7 @@
 #include "sha256.h"
 
 #include <fstream>
+#include <iostream>
 
 constexpr int MD5_BUFFER_LEN = 16;
 constexpr int MD5_STRING_LEN = MD5_BUFFER_LEN * 2;
