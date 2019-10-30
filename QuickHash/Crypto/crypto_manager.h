@@ -1,9 +1,9 @@
 #pragma once
+#include "../utils.h"
+
 #include <string>
 
 namespace crypto
 {
-	std::string calculate_md5(const std::string* filepath);
-	std::string calculate_sha1(const std::string* filepath);
-	std::string calculate_sha256(const std::string* filepath);
+	void compute_hash(const args::command_options* options);
 }
