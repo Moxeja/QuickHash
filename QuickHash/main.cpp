@@ -18,7 +18,8 @@ void print_usage()
 		"Hashes:\n"
 		"\tmd5\n"
 		"\tsha1\n"
-		"\tsha256\n");
+		"\tsha256\n"
+		"\tsha512\n");
 }
 
 int main(int argc, char* argv[])

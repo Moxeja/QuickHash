@@ -2,6 +2,7 @@
 #include "md5.h"
 #include "sha1.h"
 #include "sha256.h"
+#include "sha512.h"
 
 #include <fstream>
 #include <iostream>
@@ -14,6 +15,9 @@ constexpr int SHA1_STRING_LEN = SHA1_BUFFER_LEN * 2;
 
 constexpr int SHA256_BUFFER_LEN = 32;
 constexpr int SHA256_STRING_LEN = SHA256_BUFFER_LEN * 2;
+
+constexpr int SHA512_BUFFER_LEN = 64;
+constexpr int SHA512_STRING_LEN = SHA512_BUFFER_LEN * 2;
 
 constexpr int CHUNK_SIZE = 4096;
 
@@ -95,6 +99,27 @@ std::string calculate_sha256(const std::string* filepath)
 
 	return buffer_to_string(SHA256_STRING_LEN, hash_result, SHA256_BUFFER_LEN);
 }
+
+std::string calculate_sha512(const std::string* filepath)
+{
+	unsigned char hash_result[SHA512_BUFFER_LEN];
+	mbedtls_sha512_context ctx;
+	mbedtls_sha512_init(&ctx);
+	mbedtls_sha512_starts_ret(&ctx, 0);
+
+	std::ifstream file(*filepath, std::ifstream::binary);
+	char buffer[CHUNK_SIZE] = { 0 };
+	while (!file.eof())
+	{
+		file.read(buffer, CHUNK_SIZE);
+		unsigned int bytes_read = file.gcount();
+		mbedtls_sha512_update_ret(&ctx, (unsigned char*)buffer, bytes_read);
+	}
+	file.close();
+	mbedtls_sha512_finish_ret(&ctx, hash_result);
+
+	return buffer_to_string(SHA512_STRING_LEN, hash_result, SHA512_BUFFER_LEN);
+}
 #pragma warning(pop)
 
 void crypto::compute_hash(const args::command_options* options)
@@ -120,6 +145,11 @@ void crypto::compute_hash(const args::command_options* options)
 	{
 		hash_string = calculate_sha256(&filepath);
 		std::printf("\nSHA256: %s\n", hash_string.c_str());
+	}
+	else if (options->hash == "sha512")
+	{
+		hash_string = calculate_sha512(&filepath);
+		std::printf("\nSHA512: %s\n", hash_string.c_str());
 	}
 	else if (options->hash == "md5" || options->hash == "0")
 	{
