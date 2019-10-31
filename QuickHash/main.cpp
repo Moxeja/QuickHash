@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-constexpr const char* VERSION = "0.1";
+constexpr const char* VERSION = "0.2";
 
 void print_usage()
 {
