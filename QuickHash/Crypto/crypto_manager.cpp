@@ -57,8 +57,9 @@ std::string calculate_md5(const std::string* filepath)
 std::string calculate_sha1(const std::string* filepath)
 {
 	unsigned char hash_result[SHA1_BUFFER_LEN];
-	sha1_context ctx;
-	sha1_starts(&ctx);
+	mbedtls_sha1_context ctx;
+	mbedtls_sha1_init(&ctx);
+	mbedtls_sha1_starts_ret(&ctx);
 
 	std::ifstream file(*filepath, std::ifstream::binary);
 	char buffer[CHUNK_SIZE] = { 0 };
@@ -66,10 +67,10 @@ std::string calculate_sha1(const std::string* filepath)
 	{
 		file.read(buffer, CHUNK_SIZE);
 		unsigned int bytes_read = file.gcount();
-		sha1_update(&ctx, (unsigned char*)buffer, bytes_read);
+		mbedtls_sha1_update_ret(&ctx, (unsigned char*)buffer, bytes_read);
 	}
 	file.close();
-	sha1_finish(&ctx, hash_result);
+	mbedtls_sha1_finish_ret(&ctx, hash_result);
 
 	return buffer_to_string(SHA1_STRING_LEN, hash_result, SHA1_BUFFER_LEN);
 }

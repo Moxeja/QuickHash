@@ -1,16 +1,18 @@
-#pragma once
-
 /**
  * \file sha1.h
  *
- * \brief SHA-1 cryptographic hash function
+ * \brief This file contains SHA-1 definitions and functions.
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ * The Secure Hash Algorithm 1 (SHA-1) cryptographic hash function is defined in
+ * <em>FIPS 180-4: Secure Hash Standard (SHS)</em>.
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ * \warning   SHA-1 is considered a weak message digest and its use constitutes
+ *            a security risk. We recommend considering stronger message
+ *            digests instead.
+ */
+/*
+ *  Copyright (C) 2006-2018, Arm Limited (or its affiliates), All Rights Reserved
+ *  SPDX-License-Identifier: GPL-2.0
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,139 +27,322 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ *  This file is part of Mbed TLS (https://tls.mbed.org)
  */
-#include <string.h>
+#ifndef MBEDTLS_SHA1_H
+#define MBEDTLS_SHA1_H
 
-#ifdef _MSC_VER
-#include <basetsd.h>
-typedef UINT32 uint32_t;
-#else
-#include <inttypes.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* MBEDTLS_ERR_SHA1_HW_ACCEL_FAILED is deprecated and should not be used. */
+#define MBEDTLS_ERR_SHA1_HW_ACCEL_FAILED                  -0x0035  /**< SHA-1 hardware accelerator failed */
+#define MBEDTLS_ERR_SHA1_BAD_INPUT_DATA                   -0x0073  /**< SHA-1 input data was malformed. */
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#define POLARSSL_ERR_SHA1_FILE_IO_ERROR                -0x0076  /**< Read/write error in file. */
-
+#if !defined(MBEDTLS_SHA1_ALT)
 // Regular implementation
 //
 
 /**
- * \brief          SHA-1 context structure
+ * \brief          The SHA-1 context structure.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
  */
-typedef struct
+typedef struct mbedtls_sha1_context
 {
-    uint32_t total[2];          /*!< number of bytes processed  */
-    uint32_t state[5];          /*!< intermediate digest state  */
-    unsigned char buffer[64];   /*!< data block being processed */
-
-    unsigned char ipad[64];     /*!< HMAC: inner padding        */
-    unsigned char opad[64];     /*!< HMAC: outer padding        */
+    uint32_t total[2];          /*!< The number of Bytes processed.  */
+    uint32_t state[5];          /*!< The intermediate digest state.  */
+    unsigned char buffer[64];   /*!< The data block being processed. */
 }
-sha1_context;
+mbedtls_sha1_context;
 
-#ifdef __cplusplus
-extern "C" {
+#else  /* MBEDTLS_SHA1_ALT */
+#include "sha1_alt.h"
+#endif /* MBEDTLS_SHA1_ALT */
+
+/**
+ * \brief          This function initializes a SHA-1 context.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \param ctx      The SHA-1 context to initialize.
+ *                 This must not be \c NULL.
+ *
+ */
+void mbedtls_sha1_init( mbedtls_sha1_context *ctx );
+
+/**
+ * \brief          This function clears a SHA-1 context.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \param ctx      The SHA-1 context to clear. This may be \c NULL,
+ *                 in which case this function does nothing. If it is
+ *                 not \c NULL, it must point to an initialized
+ *                 SHA-1 context.
+ *
+ */
+void mbedtls_sha1_free( mbedtls_sha1_context *ctx );
+
+/**
+ * \brief          This function clones the state of a SHA-1 context.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \param dst      The SHA-1 context to clone to. This must be initialized.
+ * \param src      The SHA-1 context to clone from. This must be initialized.
+ *
+ */
+void mbedtls_sha1_clone( mbedtls_sha1_context *dst,
+                         const mbedtls_sha1_context *src );
+
+/**
+ * \brief          This function starts a SHA-1 checksum calculation.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \param ctx      The SHA-1 context to initialize. This must be initialized.
+ *
+ * \return         \c 0 on success.
+ * \return         A negative error code on failure.
+ *
+ */
+int mbedtls_sha1_starts_ret( mbedtls_sha1_context *ctx );
+
+/**
+ * \brief          This function feeds an input buffer into an ongoing SHA-1
+ *                 checksum calculation.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \param ctx      The SHA-1 context. This must be initialized
+ *                 and have a hash operation started.
+ * \param input    The buffer holding the input data.
+ *                 This must be a readable buffer of length \p ilen Bytes.
+ * \param ilen     The length of the input data \p input in Bytes.
+ *
+ * \return         \c 0 on success.
+ * \return         A negative error code on failure.
+ */
+int mbedtls_sha1_update_ret( mbedtls_sha1_context *ctx,
+                             const unsigned char *input,
+                             size_t ilen );
+
+/**
+ * \brief          This function finishes the SHA-1 operation, and writes
+ *                 the result to the output buffer.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \param ctx      The SHA-1 context to use. This must be initialized and
+ *                 have a hash operation started.
+ * \param output   The SHA-1 checksum result. This must be a writable
+ *                 buffer of length \c 20 Bytes.
+ *
+ * \return         \c 0 on success.
+ * \return         A negative error code on failure.
+ */
+int mbedtls_sha1_finish_ret( mbedtls_sha1_context *ctx,
+                             unsigned char output[20] );
+
+/**
+ * \brief          SHA-1 process data block (internal use only).
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \param ctx      The SHA-1 context to use. This must be initialized.
+ * \param data     The data block being processed. This must be a
+ *                 readable buffer of length \c 64 Bytes.
+ *
+ * \return         \c 0 on success.
+ * \return         A negative error code on failure.
+ *
+ */
+int mbedtls_internal_sha1_process( mbedtls_sha1_context *ctx,
+                                   const unsigned char data[64] );
+
+#if !defined(MBEDTLS_DEPRECATED_REMOVED)
+#if defined(MBEDTLS_DEPRECATED_WARNING)
+#define MBEDTLS_DEPRECATED      __attribute__((deprecated))
+#else
+#define MBEDTLS_DEPRECATED
 #endif
+/**
+ * \brief          This function starts a SHA-1 checksum calculation.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \deprecated     Superseded by mbedtls_sha1_starts_ret() in 2.7.0.
+ *
+ * \param ctx      The SHA-1 context to initialize. This must be initialized.
+ *
+ */
+MBEDTLS_DEPRECATED void mbedtls_sha1_starts( mbedtls_sha1_context *ctx );
 
 /**
- * \brief          SHA-1 context setup
+ * \brief          This function feeds an input buffer into an ongoing SHA-1
+ *                 checksum calculation.
  *
- * \param ctx      context to be initialized
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \deprecated     Superseded by mbedtls_sha1_update_ret() in 2.7.0.
+ *
+ * \param ctx      The SHA-1 context. This must be initialized and
+ *                 have a hash operation started.
+ * \param input    The buffer holding the input data.
+ *                 This must be a readable buffer of length \p ilen Bytes.
+ * \param ilen     The length of the input data \p input in Bytes.
+ *
  */
-void sha1_starts( sha1_context *ctx );
+MBEDTLS_DEPRECATED void mbedtls_sha1_update( mbedtls_sha1_context *ctx,
+                                             const unsigned char *input,
+                                             size_t ilen );
 
 /**
- * \brief          SHA-1 process buffer
+ * \brief          This function finishes the SHA-1 operation, and writes
+ *                 the result to the output buffer.
  *
- * \param ctx      SHA-1 context
- * \param input    buffer holding the  data
- * \param ilen     length of the input data
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \deprecated     Superseded by mbedtls_sha1_finish_ret() in 2.7.0.
+ *
+ * \param ctx      The SHA-1 context. This must be initialized and
+ *                 have a hash operation started.
+ * \param output   The SHA-1 checksum result.
+ *                 This must be a writable buffer of length \c 20 Bytes.
  */
-void sha1_update( sha1_context *ctx, const unsigned char *input, size_t ilen );
+MBEDTLS_DEPRECATED void mbedtls_sha1_finish( mbedtls_sha1_context *ctx,
+                                             unsigned char output[20] );
 
 /**
- * \brief          SHA-1 final digest
+ * \brief          SHA-1 process data block (internal use only).
  *
- * \param ctx      SHA-1 context
- * \param output   SHA-1 checksum result
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \deprecated     Superseded by mbedtls_internal_sha1_process() in 2.7.0.
+ *
+ * \param ctx      The SHA-1 context. This must be initialized.
+ * \param data     The data block being processed.
+ *                 This must be a readable buffer of length \c 64 bytes.
+ *
  */
-void sha1_finish( sha1_context *ctx, unsigned char output[20] );
+MBEDTLS_DEPRECATED void mbedtls_sha1_process( mbedtls_sha1_context *ctx,
+                                              const unsigned char data[64] );
 
-/* Internal use */
-void sha1_process( sha1_context *ctx, const unsigned char data[64] );
+#undef MBEDTLS_DEPRECATED
+#endif /* !MBEDTLS_DEPRECATED_REMOVED */
+
+/**
+ * \brief          This function calculates the SHA-1 checksum of a buffer.
+ *
+ *                 The function allocates the context, performs the
+ *                 calculation, and frees the context.
+ *
+ *                 The SHA-1 result is calculated as
+ *                 output = SHA-1(input buffer).
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \param input    The buffer holding the input data.
+ *                 This must be a readable buffer of length \p ilen Bytes.
+ * \param ilen     The length of the input data \p input in Bytes.
+ * \param output   The SHA-1 checksum result.
+ *                 This must be a writable buffer of length \c 20 Bytes.
+ *
+ * \return         \c 0 on success.
+ * \return         A negative error code on failure.
+ *
+ */
+int mbedtls_sha1_ret( const unsigned char *input,
+                      size_t ilen,
+                      unsigned char output[20] );
+
+#if !defined(MBEDTLS_DEPRECATED_REMOVED)
+#if defined(MBEDTLS_DEPRECATED_WARNING)
+#define MBEDTLS_DEPRECATED      __attribute__((deprecated))
+#else
+#define MBEDTLS_DEPRECATED
+#endif
+/**
+ * \brief          This function calculates the SHA-1 checksum of a buffer.
+ *
+ *                 The function allocates the context, performs the
+ *                 calculation, and frees the context.
+ *
+ *                 The SHA-1 result is calculated as
+ *                 output = SHA-1(input buffer).
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \deprecated     Superseded by mbedtls_sha1_ret() in 2.7.0
+ *
+ * \param input    The buffer holding the input data.
+ *                 This must be a readable buffer of length \p ilen Bytes.
+ * \param ilen     The length of the input data \p input in Bytes.
+ * \param output   The SHA-1 checksum result. This must be a writable
+ *                 buffer of size \c 20 Bytes.
+ *
+ */
+MBEDTLS_DEPRECATED void mbedtls_sha1( const unsigned char *input,
+                                      size_t ilen,
+                                      unsigned char output[20] );
+
+#undef MBEDTLS_DEPRECATED
+#endif /* !MBEDTLS_DEPRECATED_REMOVED */
+
+#if defined(MBEDTLS_SELF_TEST)
+
+/**
+ * \brief          The SHA-1 checkup routine.
+ *
+ * \warning        SHA-1 is considered a weak message digest and its use
+ *                 constitutes a security risk. We recommend considering
+ *                 stronger message digests instead.
+ *
+ * \return         \c 0 on success.
+ * \return         \c 1 on failure.
+ *
+ */
+int mbedtls_sha1_self_test( int verbose );
+
+#endif /* MBEDTLS_SELF_TEST */
 
 #ifdef __cplusplus
 }
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * \brief          Output = SHA-1( input buffer )
- *
- * \param input    buffer holding the  data
- * \param ilen     length of the input data
- * \param output   SHA-1 checksum result
- */
-void sha1( const unsigned char *input, size_t ilen, unsigned char output[20] );
-
-/**
- * \brief          Output = SHA-1( file contents )
- *
- * \param path     input file name
- * \param output   SHA-1 checksum result
- *
- * \return         0 if successful, or POLARSSL_ERR_SHA1_FILE_IO_ERROR
- */
-int sha1_file( const char *path, unsigned char output[20] );
-
-/**
- * \brief          SHA-1 HMAC context setup
- *
- * \param ctx      HMAC context to be initialized
- * \param key      HMAC secret key
- * \param keylen   length of the HMAC key
- */
-void sha1_hmac_starts( sha1_context *ctx, const unsigned char *key, size_t keylen );
-
-/**
- * \brief          SHA-1 HMAC process buffer
- *
- * \param ctx      HMAC context
- * \param input    buffer holding the  data
- * \param ilen     length of the input data
- */
-void sha1_hmac_update( sha1_context *ctx, const unsigned char *input, size_t ilen );
-
-/**
- * \brief          SHA-1 HMAC final digest
- *
- * \param ctx      HMAC context
- * \param output   SHA-1 HMAC checksum result
- */
-void sha1_hmac_finish( sha1_context *ctx, unsigned char output[20] );
-
-/**
- * \brief          SHA-1 HMAC context reset
- *
- * \param ctx      HMAC context to be reset
- */
-void sha1_hmac_reset( sha1_context *ctx );
-
-/**
- * \brief          Output = HMAC-SHA-1( hmac key, input buffer )
- *
- * \param key      HMAC secret key
- * \param keylen   length of the HMAC key
- * \param input    buffer holding the  data
- * \param ilen     length of the input data
- * \param output   HMAC-SHA-1 result
- */
-void sha1_hmac( const unsigned char *key, size_t keylen,
-                const unsigned char *input, size_t ilen,
-                unsigned char output[20] );
-
-#ifdef __cplusplus
-}
-#endif
+#endif /* mbedtls_sha1.h */
