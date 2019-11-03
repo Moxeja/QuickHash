@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	// Current max no. of arguments is 7
 	if (argc > 1 && argc <= 7)
 	{
-		std::vector<std::string> allArgs(argv, argv + argc);
+		const std::vector<std::string> allArgs(argv, argv + argc);
 		args::command_options options;
 		args::parse_args(&options, &allArgs);
 

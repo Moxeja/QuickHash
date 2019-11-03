@@ -4,7 +4,7 @@
 
 namespace fs
 {
-	std::string get_filename(const std::string filepath);
+	std::string get_filename(const std::string* filepath);
 }
 
 namespace args

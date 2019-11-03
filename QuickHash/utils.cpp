@@ -1,15 +1,15 @@
 #include "utils.h"
 
-std::string fs::get_filename(const std::string filepath)
+std::string fs::get_filename(const std::string* filepath)
 {
-	size_t last_index = filepath.find_last_of("\\/") + 1;
-	std::string filename = filepath.substr(last_index, std::string::npos);
+	size_t last_index = filepath->find_last_of("\\/") + 1;
+	std::string filename = filepath->substr(last_index, std::string::npos);
 	return filename;
 }
 
 void args::parse_args(command_options* options, const std::vector<std::string>* args)
 {
-	for (unsigned int i = 0; i < args->size(); i++)
+	for (int i = 0; i < args->size(); i++)
 	{
 		const std::string temp = args->at(i);
 		if (temp == "?")

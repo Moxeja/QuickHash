@@ -23,8 +23,8 @@ namespace
 
 	constexpr int CHUNK_SIZE = 4096;
 
-	std::string buffer_to_string(size_t str_len,
-		const unsigned char* buffer, size_t buf_len)
+	std::string buffer_to_string(const size_t str_len,
+		const unsigned char* buffer, const size_t buf_len)
 	{
 		std::string hash_string(str_len, 0);
 		for (unsigned long long i = 0; i < buf_len; i++)
@@ -138,7 +138,7 @@ void crypto::compute_hash(const args::command_options* options)
 
 	// Calculate and print hash result
 	std::string hash_string("null");
-	std::string filepath = options->input_file;
+	const std::string filepath = options->input_file;
 	if (options->hash == "sha1")
 	{
 		hash_string = calculate_sha1(&filepath);
@@ -172,7 +172,7 @@ void crypto::compute_hash(const args::command_options* options)
 		file.write(hash_string.c_str(), hash_string.size());
 		file.write("   ", 3);
 
-		std::string filename = fs::get_filename(options->input_file);
+		std::string filename = fs::get_filename(&options->input_file);
 		filename.append("\n");
 
 		file.write(filename.c_str(), filename.size());
