@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(QuickHasher)
+project(QuickHash)
 
 set(SRC	QuickHash/utils.h
 		QuickHash/Crypto/crypto_manager.h
@@ -17,4 +17,4 @@ set(SRC	QuickHash/utils.h
 		QuickHash/Crypto/sha256.c
 		QuickHash/Crypto/sha512.c)
 
-add_executable(quickhasher ${SRC})
+add_executable(quickhash ${SRC})
