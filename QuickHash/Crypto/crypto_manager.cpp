@@ -37,8 +37,6 @@ namespace
 		return hash_string;
 	}
 
-#pragma warning(push)
-#pragma warning(disable: 4244)
 	std::string calculate_md5(const std::string* filepath)
 	{
 		unsigned char hash_result[MD5_BUFFER_LEN];
@@ -122,7 +120,6 @@ namespace
 
 		return buffer_to_string(SHA512_STRING_LEN, hash_result, SHA512_BUFFER_LEN);
 	}
-#pragma warning(pop)
 }
 
 void crypto::compute_hash(const args::command_options* options)
